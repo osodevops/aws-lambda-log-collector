@@ -10,8 +10,6 @@ resource "aws_lambda_function" "log_collector_lambda" {
 
   environment {
     variables = {
-      KMS_ENABLED = "True"
-      KMS_KEY = var.kms_key_arn
       S3_BUCKET_NAME = var.s3_bucket_name
     }
   }
