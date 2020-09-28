@@ -56,6 +56,7 @@ def log_collector(logGroupName, awsRegion, s3BucketName):
     client = boto3.client('logs', region_name=aws_region)
     s3 = boto3.resource('s3')
 
+    print('For LogGroup ' + logGroupName)
     print('Events between: ' + str(ts) + ' and ' + str(te))
     print('------------- LogStreamName -------------- : # events')
     all_streams = []
