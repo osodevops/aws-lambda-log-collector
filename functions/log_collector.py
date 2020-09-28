@@ -56,8 +56,8 @@ def log_collector(logGroupName, awsRegion, s3BucketName):
     client = boto3.client('logs', region_name=aws_region)
     s3 = boto3.resource('s3')
 
-    logger.info('Events between: ' + str(ts) + ' and ' + str(te))
-    logger.info('------------- LogStreamName -------------- : # events')
+    print('Events between: ' + str(ts) + ' and ' + str(te))
+    print('------------- LogStreamName -------------- : # events')
     all_streams = []
     stream_batch = client.describe_log_streams(logGroupName=log_group_name)
     all_streams += stream_batch['logStreams']
@@ -73,7 +73,7 @@ def log_collector(logGroupName, awsRegion, s3BucketName):
         for event in logs_batch['events']:
             event.update({'group': log_group_name, 'stream': stream})
             out_file.append(json.dumps(event))
-        logger.info(stream, ":", len(logs_batch['events']))
+        print(stream, ":", len(logs_batch['events']))
         while 'nextToken' in logs_batch:
             logs_batch = client.get_log_events(logGroupName=log_group_name, logStreamName=stream, startTime=ts, endTime=te,
                                                nextToken=logs_batch['nextToken'])
@@ -81,16 +81,16 @@ def log_collector(logGroupName, awsRegion, s3BucketName):
                 event.update({'group': log_group_name, 'stream': stream})
                 out_file.append(json.dumps(event))
     
-    logger.info('-------------------------------------------\nTotal number of events: ' + str(len(out_file)))
-    logger.info(file_name)
+    print('-------------------------------------------\nTotal number of events: ' + str(len(out_file)))
+    print(file_name)
     s3object = s3.Object(s3_bucket_name,file_name)
     try:
         s3object.put(Body=json.dumps(out_file))
     except botocore.exceptions.ClientError as e:
         if e.response['Error']['Code'] == 'NoSuchUpload':
-            logger.info("Upload Failed")
+            print("Upload Failed")
     else:
-        logger.info("Log file uploaded to s3\n")
+        print("Log file uploaded to s3\n")
 
 
 
