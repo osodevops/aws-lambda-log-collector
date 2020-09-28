@@ -86,7 +86,7 @@ def log_collector(logGroupName, awsRegion, s3BucketName):
     s3object = s3.Object(s3_bucket_name,file_name)
     try:
         s3object.put(Body=json.dumps(out_file))
-    except botocore.exceptions.ClientError as e:
+    except ClientError as e:
         if e.response['Error']['Code'] == 'NoSuchUpload':
             print("Upload Failed")
     else:
