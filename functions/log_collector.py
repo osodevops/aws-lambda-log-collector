@@ -39,7 +39,7 @@ def lambda_handler(event,context):
 
     response = client.describe_log_groups()
     for i in response['logGroups']:
-        log_collector(i['logGroupName'], aws_region, s3_bucket_name)
+        log_collector(str(i['logGroupName']), str(aws_region), str(s3_bucket_name))
         # print(aws_region)
         # print(s3_bucket_name)
         # print(i['logGroupName'])
