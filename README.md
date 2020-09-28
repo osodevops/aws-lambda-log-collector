@@ -4,7 +4,7 @@
 
 ---
 
-This Terraform module creates a lambda function which takes regular back-ups from logs and stores them in s3. The Lambda function which is triggered by a scheduled Cloudwatch event.
+This Terraform module creates a lambda function which takes regular back-ups from logs and stores them in s3. The Lambda function is triggered by a scheduled Cloudwatch event.
 
 This project is part of our open source DevOps adoption approach. 
 

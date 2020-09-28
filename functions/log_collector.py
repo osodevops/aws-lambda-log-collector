@@ -8,9 +8,6 @@ from datetime import date, datetime, timedelta
 from botocore.exceptions import ClientError
 
 s3_bucket_name = os.environ['S3_BUCKET_NAME']
-# log_group_name = '/aws/eks/oso-ops/cluster'	
-# s3_bucket_name = 'oso-ops-cw' # export S3_BUCKET_NAME="oso-ops-cw"
-# aws_region = 'eu-west-2'
 start_number_of_days= 1
 end_number_of_days= 0
 #############################
@@ -28,21 +25,15 @@ def lambda_handler(event,context):
     logger.info(data)
 
     # grab parameters from our event
-    # resource_id = event['resources'][0]
     aws_region = event['region']
-    log_group_list = []
 
     # init boto3
-    # boto3.session.Session(profile_name="default")
     client = boto3.client('logs', region_name=aws_region)
     s3 = boto3.resource('s3')
 
     response = client.describe_log_groups()
     for i in response['logGroups']:
         log_collector(str(i['logGroupName']), str(aws_region), str(s3_bucket_name))
-        # print(aws_region)
-        # print(s3_bucket_name)
-        # print(i['logGroupName'])
         time.sleep(15)
 
 
@@ -50,9 +41,10 @@ def log_collector(logGroupName, awsRegion, s3BucketName):
     log_group_name = logGroupName
     aws_region = awsRegion
     s3_bucket_name = s3BucketName
-    file_name = logGroupName.replace("/","") + '-' + timestring + '.json'
+    file_name = logGroupName.replace("/","-") + '-' + timestring + '.json'
+    if file_name.startswith('-'):
+        file_name = file_name[1:]
     # init boto3
-    # boto3.session.Session(profile_name="default")
     client = boto3.client('logs', region_name=aws_region)
     s3 = boto3.resource('s3')
 
@@ -94,6 +86,6 @@ def log_collector(logGroupName, awsRegion, s3BucketName):
         print("Log file uploaded to s3\n")
 
 
-
-# lambda_handler({'region': 'eu-west-2'},'daily')
+### Test event
+# lambda_handler({'region': 'eu-west-2', 'account': '111222333444'}, {'context'})
 
