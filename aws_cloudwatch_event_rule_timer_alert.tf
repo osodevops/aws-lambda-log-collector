@@ -1,7 +1,8 @@
 resource "aws_cloudwatch_event_rule" "timer_alert" {
   name = "${upper(var.environment)}-LOG-COLLECTOR-TIMER-ALERT"
   description = "Send alerts to start log collection."
-  schedule_expression = "cron(0 15 2 * * ?)"
+  schedule_expression = "cron(15 2 * * ? *)"
+  is_enabled          = true
 }
 
 resource "aws_cloudwatch_event_target" "lambda_alert" {
