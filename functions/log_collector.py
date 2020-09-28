@@ -15,7 +15,7 @@ start_number_of_days= 1
 end_number_of_days= 0
 #############################
 timestring = datetime.fromtimestamp(time.time()).strftime('%Y%m%d-%Hh%Mm%Ss')
-ts=(int((datetime.today() - timedelta(hours=0.1 * start_number_of_days)).timestamp())) * 1000
+ts=(int((datetime.today() - timedelta(hours=24 * start_number_of_days)).timestamp())) * 1000
 te=(int((datetime.today() - timedelta(hours=24 * end_number_of_days)).timestamp())) * 1000
 
 # logging init
