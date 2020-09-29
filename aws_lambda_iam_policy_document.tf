@@ -14,7 +14,10 @@ data "aws_iam_policy_document" "lambda_config_policy" {
   statement {
     effect = "Allow"
     actions   = ["s3:*"]
-    resources = ["arn:aws:s3:::${var.s3_bucket_name}"]
+    resources = [
+        "arn:aws:s3:::${var.s3_bucket_name/*}",
+        "arn:aws:s3:::${var.s3_bucket_name}"
+    ]
   }
 
   statement {

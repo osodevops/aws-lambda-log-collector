@@ -75,7 +75,10 @@ def log_collector(logGroupName, awsRegion, s3BucketName):
     s3 = boto3.resource('s3')
     # s3.meta.client.upload_file(file_name,s3_bucket_name)
     s3object = s3.Object(s3_bucket_name,file_name)
+    s3object.put(Body=json.dumps(out_file))
     print('Starting the upload of file ' + file_name + ' to s3 bucket ' + s3_bucket_name)
+    print(s3object)
+    print(s3object.Body)
     try:
         s3object.put(Body=json.dumps(out_file))
     except ClientError as e:
