@@ -29,8 +29,6 @@ def lambda_handler(event,context):
 
     # init boto3
     client = boto3.client('logs', region_name=aws_region)
-    s3 = boto3.resource('s3')
-
     response = client.describe_log_groups()
     for i in response['logGroups']:
         log_collector(str(i['logGroupName']), str(aws_region), str(s3_bucket_name))
@@ -46,8 +44,6 @@ def log_collector(logGroupName, awsRegion, s3BucketName):
         file_name = file_name[1:]
     # init boto3
     client = boto3.client('logs', region_name=aws_region)
-    s3 = boto3.resource('s3')
-
     print('For LogGroup ' + logGroupName)
     print('Events between: ' + str(ts) + ' and ' + str(te))
     print('------------- LogStreamName -------------- : # events')
@@ -76,7 +72,10 @@ def log_collector(logGroupName, awsRegion, s3BucketName):
     
     print('-------------------------------------------\nTotal number of events: ' + str(len(out_file)))
     print(file_name)
+    s3 = boto3.resource('s3')
+    # s3.meta.client.upload_file(file_name,s3_bucket_name)
     s3object = s3.Object(s3_bucket_name,file_name)
+    print('Starting the upload of file ' + file_name + ' to s3 bucket ' + s3_bucket_name)
     try:
         s3object.put(Body=json.dumps(out_file))
     except ClientError as e:
@@ -88,4 +87,17 @@ def log_collector(logGroupName, awsRegion, s3BucketName):
 
 ### Test event
 # lambda_handler({'region': 'eu-west-2', 'account': '111222333444'}, {'context'})
+# lambda_handler({
+#     "version": "0",
+#     "id": "addd8a38-c5d9-44c1-8840-220fd4585adc",
+#     "detail-type": "Scheduled Event",
+#     "source": "aws.events",
+#     "account": "109716644331",
+#     "time": "2020-09-29T10:15:00Z",
+#     "region": "eu-west-2",
+#     "resources": [
+#         "arn:aws:events:eu-west-2:109716644331:rule/TEST-LOG-COLLECTOR-TIMER-ALERT"
+#     ],
+#     "detail": {}
+# }, {'context'})
 
