@@ -3,7 +3,7 @@
 This script will pull all the events (for the specified time period) for all the log groups and their respective log streams from cloudwatch logs 
 and upload them to an s3 bucket.
 """
-import boto3, json, time, logging, os
+import boto3, json, time, logging, os, gzip
 from datetime import date, datetime, timedelta
 from botocore.exceptions import ClientError
 
@@ -39,7 +39,10 @@ def log_collector(logGroupName, awsRegion, s3BucketName):
     log_group_name = logGroupName
     aws_region = awsRegion
     s3_bucket_name = s3BucketName
-    file_name = logGroupName.replace("/","-") + '-' + timestring + '.json'
+    folder_name = logGroupName.replace("/","-")
+    if folder_name.startswith('-'):
+        folder_name = folder_name[1:]
+    file_name = logGroupName.replace("/","-") + '-' + timestring + '.gz'
     if file_name.startswith('-'):
         file_name = file_name[1:]
     # init boto3
@@ -73,34 +76,18 @@ def log_collector(logGroupName, awsRegion, s3BucketName):
     print('-------------------------------------------\nTotal number of events: ' + str(len(out_file)))
     print(file_name)
     s3 = boto3.resource('s3')
-    # s3.meta.client.upload_file(file_name,s3_bucket_name)
-    s3object = s3.Object(s3_bucket_name,file_name)
-    s3object.put(Body=json.dumps(out_file))
+    json_str = json.dumps(out_file)
+    json_bytes = json_str.encode('utf-8')
+    gzip_object = gzip.compress(json_bytes)
+    s3object = s3.Object(s3_bucket_name, folder_name + '/' + file_name)
     print('Starting the upload of file ' + file_name + ' to s3 bucket ' + s3_bucket_name)
-    # print(s3object)
-    # print(s3object.Body)
     try:
-        s3object.put(Body=json.dumps(out_file))
+        s3object.put(Body=gzip_object)
     except ClientError as e:
         if e.response['Error']['Code'] == 'NoSuchUpload':
             print("Upload Failed")
     else:
         print("Log file uploaded to s3\n")
 
-
-### Test event
+### Local test event
 # lambda_handler({'region': 'eu-west-2', 'account': '111222333444'}, {'context'})
-# lambda_handler({
-#     "version": "0",
-#     "id": "addd8a38-c5d9-44c1-8840-220fd4585adc",
-#     "detail-type": "Scheduled Event",
-#     "source": "aws.events",
-#     "account": "109716644331",
-#     "time": "2020-09-29T10:15:00Z",
-#     "region": "eu-west-2",
-#     "resources": [
-#         "arn:aws:events:eu-west-2:109716644331:rule/TEST-LOG-COLLECTOR-TIMER-ALERT"
-#     ],
-#     "detail": {}
-# }, {'context'})
-
