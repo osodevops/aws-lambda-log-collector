@@ -46,6 +46,7 @@ def log_collector(logGroupName, awsRegion, s3BucketName):
     if file_name.startswith('-'):
         file_name = file_name[1:]
     # init boto3
+    s3 = boto3.resource('s3')
     client = boto3.client('logs', region_name=aws_region)
     print('For LogGroup ' + logGroupName)
     print('Events between: ' + str(ts) + ' and ' + str(te))
@@ -75,7 +76,6 @@ def log_collector(logGroupName, awsRegion, s3BucketName):
     
     print('-------------------------------------------\nTotal number of events: ' + str(len(out_file)))
     print(file_name)
-    s3 = boto3.resource('s3')
     json_str = json.dumps(out_file)
     json_bytes = json_str.encode('utf-8')
     gzip_object = gzip.compress(json_bytes)
