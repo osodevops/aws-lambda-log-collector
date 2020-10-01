@@ -17,10 +17,6 @@ variable "s3_sse_algorithm" {
   default = "aws:kms"
 }
 
-variable "create_compressed_log_s3_bucket" {
-  default = true
-}
-
 locals {
   compressed_logs_bucket_name = "cloudwatch-compressed-logs-${data.aws_region.current.name}-${data.aws_caller_identity.current.account_id}"
 }
