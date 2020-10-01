@@ -18,7 +18,7 @@ data "aws_iam_policy_document" "lambda_config_policy" {
     ]
 
     resources = [
-      "${aws_s3_bucket.compressed_logs.arn}/*",
+      "${module.bucket-tableau-backup.s3_arn}/*",
     ]
 
   }
