@@ -1,6 +1,5 @@
 module "bucket-tableau-backup" {
-//  source                  = "git::ssh://git@github.com/osodevops/aws-terraform-module-s3.git"
-  source                  = "../../aws-terraform-module-s3"
+  source                  = "git::ssh://git@github.com/osodevops/aws-terraform-module-s3.git"
   s3_bucket_name          = local.compressed_logs_bucket_name
   s3_bucket_force_destroy = false
   s3_bucket_policy        = ""
