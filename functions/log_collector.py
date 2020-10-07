@@ -127,7 +127,8 @@ def log_collector(logGroupName, awsRegion, s3BucketName, passNumber):
             for event in logs_batch['events']:
                 event.update({'group': log_group_name, 'stream': stream})
                 out_file.append(json.dumps(event))
-    
+            print(stream, ":", len(logs_batch['events']))
+
     print('-------------------------------------------\nTotal number of events: ' + str(len(out_file)))
     print(file_name)
 
