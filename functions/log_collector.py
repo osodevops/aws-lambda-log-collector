@@ -131,7 +131,6 @@ def log_collector(logGroupName, awsRegion, s3BucketName, passNumber):
     
     print('-------------------------------------------\nTotal number of events: ' + str(len(out_file)))
     print(file_name)
-    return lgnumber
 
     json_str = json.dumps(out_file)
     json_bytes = json_str.encode('utf-8')
