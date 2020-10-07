@@ -75,7 +75,6 @@ def lambda_handler(event,context):
     # print(log_group_array)
     print('Total ' + str(len(log_group_array)))
     # With the final list array (log_group_array) we start the process of gathering log events
-    log_group_array = ['/aws/rds/instance/webserver-database-instance/general']
     for e in log_group_array:
         log_collector(str(e), str(aws_region), str(s3_bucket_name), int(passnumber))
         passnumber = passnumber + 1
