@@ -7,7 +7,6 @@ import boto3, json, time, logging, os, gzip
 from datetime import date, datetime, timedelta
 from botocore.exceptions import ClientError
 
-# EXPORT S3_BUCKET_NAME="cloudwatch-compressed-logs-eu-west-2-637085696726"
 s3_bucket_name = os.environ['S3_BUCKET_NAME']
 start_number_of_days= 1
 end_number_of_days= 0
