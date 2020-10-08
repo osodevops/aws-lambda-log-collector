@@ -5,7 +5,7 @@ resource "aws_lambda_function" "log_collector_lambda" {
   role             = aws_iam_role.log_collector_lambda.arn
   handler          = "log_collector.lambda_handler"
   runtime          = "python3.6"
-  timeout          = 180
+  timeout          = 900
   source_code_hash = data.archive_file.log_collector.output_base64sha256
 
   environment {
