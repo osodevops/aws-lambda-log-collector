@@ -34,13 +34,10 @@ def lambda_handler(event,context):
 
     # init boto3
     client = boto3.client('logs', region_name=aws_region)
-    response = client.describe_log_groups()
 
     # get the output of LogGroups api call, "stream" it into an array of objects and then loop through the array to create a list array of logGroupNames 
     log_group_stream = client.describe_log_groups() #logGroupName=log_group_name, descending=True, limit=50, orderBy='LastEventTime')
     log_group_object_array += log_group_stream['logGroups']
-    log_group_name_dict = [stream_lg['logGroupName'] for stream_lg in log_group_object_array]
-
     # LogGroups API call will only return max 50 results so we need to handle situations where the number of logGroups is greater than 50
     while 'nextToken' in log_group_stream:
         log_group_stream = client.describe_log_groups(nextToken=log_group_stream['nextToken'])
@@ -102,8 +99,6 @@ def log_collector(logGroupName, awsRegion, s3BucketName, passNumber):
     all_streams = []
     stream_batch = client.describe_log_streams(logGroupName=log_group_name, descending=True, limit=50, orderBy='LastEventTime')
     all_streams += stream_batch['logStreams']
-    stream_names = [stream['logStreamName'] for stream in all_streams]
-
     # LogStreams API call will only return max 50 results at a time so we need to handle situations where the number is greater.
     # But since a single log group can, over the years, accumulate tens of thousands of log streams and since we don't want to
     # fetch all these old log groups we set the upper limit with (k). Upper limit amounts to 50*(k)=250 in this case.
@@ -113,24 +108,24 @@ def log_collector(logGroupName, awsRegion, s3BucketName, passNumber):
         all_streams += stream_batch['logStreams']
         k = k + 1
     stream_names = [stream['logStreamName'] for stream in all_streams]
-    # print(len(all_streams))
     out_file = []
     for stream in stream_names:
-        logs_batch = client.get_log_events(logGroupName=log_group_name, logStreamName=stream, startTime=ts, endTime=te)
+        logs_batch = client.get_log_events(logGroupName=log_group_name, logStreamName=stream, startTime=ts, endTime=te, startFromHead=True)
         for event in logs_batch['events']:
             event.update({'group': log_group_name, 'stream': stream})
             out_file.append(json.dumps(event))
-        print(stream, ":", len(logs_batch['events']))
         # GetLogEvents API call will return max 10000 events per log stream. We need a loop if logStream has more events, similarly than in previous loops, 
         # but this time we need extra logic since GetLogEvents API will ALWAYS return a nextBackwardToken (response token equals request token at the end).
-        # We check for the length of the events array, when we have reached the end it will be 0.
+        # For this same reason we always go inside the while loop for and execute at least the first print statement, make the next logs_batch request and
+        # check for the length of the events array - if it is 0 then we are at the end and both the loop and the if-clause within the loop equal false.
         while 'nextBackwardToken' in logs_batch and len(logs_batch['events']) != 0:
-            logs_batch = client.get_log_events(logGroupName=log_group_name, logStreamName=stream, startTime=ts, endTime=te, nextToken=logs_batch['nextBackwardToken'])
+            print(stream, ":", len(logs_batch['events']), "     Group total :", len(out_file))
+            logs_batch = client.get_log_events(logGroupName=log_group_name, logStreamName=stream, startTime=ts, endTime=te, startFromHead=True, nextToken=logs_batch['nextBackwardToken'])
             if len(logs_batch['events']) != 0:
-                print(stream, ":", len(logs_batch['events']))
                 for event in logs_batch['events']:
                     event.update({'group': log_group_name, 'stream': stream})
                     out_file.append(json.dumps(event))
+                print(stream, ":", len(logs_batch['events']), "     Group total :", len(out_file))
 
 
     print('-------------------------------------------\nTotal number of events: ' + str(len(out_file)))
